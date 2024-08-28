@@ -1,0 +1,267 @@
+#student sql
+
+create table student
+(st_id int not null,
+first_name char(30),
+last_name char(30),
+age int,
+place char(30),
+phone_number varchar(30),
+primary key(st_id));
+
+create table marks
+(st_id int not null,
+first_name char(30),
+last_name char(30),
+marks int);
+
+insert into student(st_id,first_name,last_name,age,place,phone_number)
+values
+(1,'Ketan','George',22,'Kozhikode',9778240772),
+(2,'Aswin','Krishna',22,'Kannur',9456473434),
+(3,'Rahul','Lee',21,'Trivandrum',9045632778),
+(4,'Sreekanth','Santhosh',22,'Kozhikode',9867668789),
+(5,'Mathew','Vargheese',22,'Ernakulam',56372782165);
+
+insert into marks(st_id,first_name,last_name,marks)
+values
+(1,'Ketan','George',96),
+(2,'Aswin','Krishna',90),
+(3,'Rahul','Lee',85),
+(4,'Sreekanth','Santhosh',80),
+(5,'Mathew','Vargheese',82);
+
+select*from student;
+select*from marks;
+select first_name,last_name,age,age+10 from student;
+select distinct first_name,age from student;
+
+select*from student where age>20;
+select*from student where age<20;
+select*from student where age=22;
+select*from student where age=21;
+select*from student where first_name like'K%'and age = 22;
+select*from student where first_name = 'Rahul' and age=21;
+select*from student where first_name='Rahul' or age = 23;
+select*from student where (first_name='Ketan' or age = 21) and place = 'Trivandrum';
+
+
+select avg(age) from student order by first_name asc;
+select*from student order by first_name asc;
+select first_name,age from student order by first_name;
+select first_name,age from student group by first_name,age;
+select first_name,age from student group by phone_number,age;
+select first_name,age from student order by age;
+select first_name,max(age),avg(age) from student group by first_name;
+select count(age) from student;
+select first_name,max(age),min(age) from student order by st_id;
+select st_id from student;
+select st_id,age from student order by st_id desc;
+select*from student order by age asc;
+select*from student order by age;
+select*from student order by first_name;
+
+select first_name,avg(age) from student group by first_name having avg(age);
+select first_name,avg(age) from student where first_name like 'K%' group by first_name having avg(age)>21;
+
+select*from student order by age asc limit 1,2;
+select place,avg(age) as avg_age from student group by place having avg_age<22;
+
+select*from student;
+select*from marks;
+
+
+select*from student as std
+inner join marks as mark
+on std.st_id=mark.st_id;
+
+select*from student as std
+left join marks as mark
+on std.st_id=mark.st_id;
+
+select*from student as std
+right join marks as mark
+on std.st_id=mark.st_id;
+
+select*from student;
+select*from marks;
+
+
+select first_name,last_name,'graduate' as label
+from student
+where age>21 and place like '%K'
+union
+select first_name,last_name,'under graduate' as label
+from student
+where age<21 and place like '%T'
+union
+select first_name,last_name,'Excellent' as label
+from marks
+where marks>85
+order by first_name,last_name;
+
+
+select first_name,length(first_name)
+from student
+order by 2;
+
+select first_name,upper(last_name)
+from student
+order by 2;
+
+select first_name,upper(first_name)
+from student
+order by 2;
+
+select first_name,left(first_name,4)
+from student;
+
+select first_name,
+left(first_name,4),
+right(first_name,4),
+substring(first_name,3,2),
+phone_number,
+substring(phone_number,6,2) as number
+from student;
+
+select first_name,replace(first_name,'a','z')
+from student;
+
+select first_name,locate('th',first_name)
+from student;
+
+select first_name,last_name,concat(first_name,' ',last_name) as fullname
+from student;
+
+
+select first_name,last_name,marks,
+case 
+when marks>85 then 'Excellent'
+when marks>90 then 'Excellent'
+when marks between 85 and 90 then'Very Good'
+when marks<85 then 'Good'
+end as remark
+from marks;
+
+
+select first_name,last_name,age,
+case
+when age>20 then age+(age*0.05)
+when age<22 then age+10
+end as new_age
+from student;
+
+select first_name,last_name,age,
+case
+when age>20 then age+(age*0.05)
+when age=20 then age+10
+end as new_age,
+case
+when st_id=1 then age+(age*0.05)
+end as bonus
+from student;
+
+
+select st_id from student
+where st_id in(select st_id from student where age =22);
+
+select first_name,last_name,age,(select avg(age)from student) as avg_age from student;
+
+select place,avg(age),max(age),min(age)
+from student
+group by place;
+
+select place,avg('max(age)') 
+from student group by place;
+
+select place,avg(max_age) 
+from
+(select place,avg(age) as avg_age,max(age) as max_age,min(age) as min_age
+from student
+group by place) as agg_table
+group by place;
+
+
+select std.first_name,std.last_name,place,sum(age) over(partition by place order by std.st_id) as age
+from student std
+join marks mark
+on std.st_id=mark.st_id;
+
+select std.first_name,std.last_name,place,sum(age),
+row_number() over(partition by place order by age desc) as row_num,
+rank() over(partition by place order by age desc) as rank_num,
+dense_rank() over(partition by place order by age desc) as dense_rank_num
+from student std
+join marks mark
+on std.st_id=mark.st_id;
+
+with CTE_example as (select place,avg(age) as avg_age,min(age) as min_age,max(age) as max_age,count(age) as count_age
+from student std
+join marks mark
+on std.st_id=mark.st_id
+group by place)
+select*from CTE_example;
+
+with CTE_example as(select st_id,place,age
+from student
+where age>21),
+CTE_example2 as(select st_id,marks
+from marks
+where marks>90)
+select*from CTE_example
+join CTE_example2
+on CTE_example.st_id=CTE_example2.st_id;
+
+with CTE_example (place,avg_age,min_age,max_age,count_age) as
+(select place,avg(age) as avg_age,min(age) as min_age,max(age) as max_age,count(age) as count_age
+from student std
+join marks mark
+on std.st_id=mark.st_id
+group by place)
+select*from CTE_example;
+
+create temporary table age_over_21
+select*from student 
+where age>21;
+
+select*from age_over_21;
+
+delimiter $$
+create procedure large_age(st_id int)
+begin
+ select age from student
+ where st_id=1;
+end $$
+delimiter ;
+call large_age(1);
+
+select*from student;
+select*from marks;
+
+delimiter $$
+create trigger student_insert
+   after insert on marks
+   for each row
+begin
+   insert into student(st_id,first_name,last_name)
+   values(new.st_id,new.first_name,new.last_name);
+end $$
+delimiter ;
+
+insert into marks(st_id,first_name,last_name,marks)
+values(6,'Gokul','Krishna',77);
+
+select*from student;
+
+delimiter $$
+create event delete_retirees
+on schedule every 30 second
+do
+begin
+   select*from student
+   where age>21;
+end $$
+delimiter ;
+
+show variables like 'event%';
+
